@@ -16,6 +16,21 @@ shinyServer(function(input, output, session) {
   output$summaryData <- renderPrint({
     summary(listings())
   })
+  output$maxPriceSlider <- renderUI({
+    sliderInput("maxPrice", "Maximal Price", 
+                min=min(listings()$price), max=quantile(listings()$price, 0.9), 
+                value = median(listings()$price))
+  })
+  output$minNightsSlider <- renderUI({
+    sliderInput("minNights", "Minumum Nights", 
+                min=1, max=quantile(listings()$minimum_nights, 0.9), 
+                value = median(listings()$minimum_nights))
+  })
+  output$roomTypesCheckbox <- renderUI({
+    checkboxGroupInput("roomTypes", "Room Type", 
+                       choices = levels(listings()$room_type), 
+                       selected = levels(listings()$room_type))
+  })
   output$map <- renderLeaflet({
     ColorPal2 <- colorNumeric(scales::seq_gradient_pal(low = "red", high = "black", 
                                                        space = "Lab"), domain = c(0,1))

@@ -41,16 +41,9 @@ shinyUI(
                   tabPanel("Explore",
                            sidebarLayout(
                              sidebarPanel(
-                               sliderInput("maxPrice", "Maximal Price", 
-                                           min=min(listings$price), max=quantile(listings$price, 0.9), 
-                                           value = median(listings$price)),
-                               sliderInput("minNights", "Minumum Nights", 
-                                           min=1, max=quantile(listings$minimum_nights, 0.9), 
-                                           value = median(listings$minimum_nights)),
-                               checkboxGroupInput("roomTypes", "Room Type", 
-                                                  choices = levels(listings$room_type), 
-                                                  selected = levels(listings$room_type))
-  ,
+                               uiOutput("maxPriceSlider"),
+                               uiOutput("minNightsSlider"),
+                               uiOutput("roomTypesCheckbox")
                              ),
                              
                              # Show a plot of the generated distribution
