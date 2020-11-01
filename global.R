@@ -14,3 +14,11 @@ read_data <- function(filename){
 
 supportedCities <- list("Paris", "Lyon", "Bordeaux")
 cityListings <- list(Paris=read_data("paris"), Lyon=read_data("lyon"), Bordeaux=read_data("bordeaux"))
+
+# Choices for displaying value and key:
+choicesHistogram <- c("Price" = "price", "Minimum Nights" = "minimum_nights",
+                      "Number of Listings of Host" = "calculated_host_listings_count",
+                      "Number of Reviews" = "number_of_reviews")
+choicesScatter <- c("Price" = "price", "Minimum Nights" = "minimum_nights",
+                      "Number of Listings of Host" = "calculated_host_listings_count",
+                      "Number of Reviews" = "number_of_reviews")

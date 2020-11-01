@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(ggplot2)
 
 shinyServer(function(input, output, session) {
   listings <- reactive({
@@ -30,6 +31,22 @@ shinyServer(function(input, output, session) {
     checkboxGroupInput("roomTypes", "Room Type", 
                        choices = levels(listings()$room_type), 
                        selected = levels(listings()$room_type))
+  })
+  output$barplot <- renderPlot({
+    xdata <- if(input$barplot_var == "Neighbourhood") "neighbourhood" else "room_type"
+    ggplot(listings()) + aes_string(x=xdata) + geom_bar() + labs(y="Number of Listings", x=input$barplot_var)
+  })
+  output$histograms <- renderAmCharts({
+    custom_listings <- custom_listings <- listings()[listings()[,input$varHist] < quantile(listings()[,input$varHist], input$quantileHist),]
+    amHist(custom_listings[,input$varHist], control_hist = list(breaks = input$barsHist),
+           freq=FALSE, xlab=names(choicesHistogram)[choicesHistogram == input$varHist])
+  })
+  output$scatterPlot <- renderPlot({
+    custom_listings <- custom_listings <- listings()[listings()[,input$xVarScatter] < quantile(listings()[,input$xVarScatter], input$quantileScatterX),]
+    p <- ggplot(custom_listings) + aes_string(x=input$xVarScatter, y=input$yVarScatter, colour="room_type") + geom_point(alpha=0.5)
+    p <- p + xlab(names(choicesScatter)[choicesScatter == input$xVarScatter]) + ylab(names(choicesScatter)[choicesScatter == input$yVarScatter])
+    p <- p + guides(colour=guide_legend(title="Room Type"))
+    p
   })
   output$map <- renderLeaflet({
     ColorPal2 <- colorNumeric(scales::seq_gradient_pal(low = "red", high = "black", 

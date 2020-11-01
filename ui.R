@@ -20,21 +20,49 @@ shinyUI(
                               widths = c(2,10),
                               tabPanel(
                                 "Data",
-                                # Sidebar with a slider input for number of bins
                                 sidebarLayout(
                                   sidebarPanel(
                                     radioButtons(inputId = "dataset", label = "City", choices = supportedCities, selected = supportedCities[1])
                                   ),
-                                  
-                                  # Show a plot of the generated distribution
                                   mainPanel(
                                     verbatimTextOutput("summaryData")
                                   )
                                 )
                               ),
                               tabPanel(
-                                "Summary",
+                                "Details",
                                 dataTableOutput("allInfo")
+                              ),
+                              tabPanel(
+                                "Descriptive Stats",
+                                sidebarLayout(
+                                  sidebarPanel(
+                                    selectInput("barplot_var", "Select Variable", choices = c("Room Type", "Neighbourhood"), selected = "room_type")
+                                  ),
+                                  mainPanel(
+                                    plotOutput("barplot"),
+                                  )
+                                ),
+                                sidebarLayout(
+                                  sidebarPanel(
+                                    sliderInput("quantileHist", "Select quantile to cutoff", min=0.1, max=1, step=0.01, value=0.99),
+                                    sliderInput("barsHist", "Select number of bins", min=1, max=300, step=1, value=100),
+                                    selectInput("varHist", "Select variable", choices = choicesHistogram)
+                                  ),
+                                  mainPanel(
+                                    amChartsOutput("histograms")
+                                  )
+                                ),
+                                sidebarLayout(
+                                  sidebarPanel(
+                                    sliderInput("quantileScatterX", "Select quantile to cutoff x", min=0.1, max=1, step=0.01, value=0.99),
+                                    selectInput("xVarScatter", "Select variable for x", choices = choicesScatter, selected = choicesScatter[1]),
+                                    selectInput("yVarScatter", "Select variable for y", choices = choicesScatter, selected = choicesScatter[2])
+                                  ),
+                                  mainPanel(
+                                    plotOutput("scatterPlot")
+                                  )
+                                )
                               )
                             )
                    ),
