@@ -12,9 +12,16 @@ library(ggplot2)
 library(plyr)
 
 shinyServer(function(input, output, session) {
+  #####################################
+  # Dynamic data:
   listings <- reactive({
     cityListings[[input$dataset]]
   })
+  nhoods <- reactive({
+    cityNhoods[[input$dataset]]
+  })
+  
+  #####################################
   output$summaryData <- renderPrint({
     summary(listings())
   })
@@ -62,21 +69,22 @@ shinyServer(function(input, output, session) {
     amBarplot("label", "value", data = sorted, depth = 10, labelRotation=20, main="Average Price per neighbourhood")
   })
   output$map <- renderLeaflet({
-    ColorPal2 <- colorNumeric(scales::seq_gradient_pal(low = "red", high = "black", 
-                                                       space = "Lab"), domain = c(0,1))
+    pal <- colorNumeric("Reds", NULL)
     customdata <- listings()[1:300,] # Taking only a small subset for now to test stuff..
     customdata <- customdata[customdata$price <= input$maxPrice,]
     customdata <- customdata[customdata$minimum_nights <= input$minNights,]
     customdata <- customdata[customdata$room_type %in% input$roomTypes,]
-    leaflet(data=customdata) %>% addTiles() %>% 
-      addCircleMarkers(~longitude, ~latitude,
+    
+    leaflet(data=nhoods()) %>% addTiles() %>% addPolygons() %>% 
+      addCircles(~longitude, ~latitude,
                        popup = ~paste(paste("<b>", name, "</b>"),
                                       paste("<b>Reviews: </b> ", as.character(number_of_reviews)),
                                       paste("<b>Price: </b> ", as.character(price), "€"),
                                       paste("<b>Minimum nights: </b> ", as.character(minimum_nights)),
                                       paste("<b>Room type: </b> ", as.character(room_type)),
                                       paste("<b>Host: </b> ", as.character(host_name)),
-                                      sep = "<br/>"), color = ~ColorPal2(reviews_per_month))
+                                      sep = "<br/>"),
+                       color = ~pal(price), data = customdata, radius = 50, opacity = 0.7)
   })
   output$allInfo <- renderDataTable(listings())
 })

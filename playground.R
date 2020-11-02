@@ -10,7 +10,7 @@ nbhoods <- read.csv("Data/neighbourhoods.csv")
 listings <- listings[ , !(names(listings) %in% c("neighbourhood_group"))]
 
 
-listings <- cityListings[["Bordeaux"]]
+listings <- cityListings[["Paris"]]
 
 custom_listings <- listings[listings$price < quantile(listings$price, 0.99),]
 
@@ -38,6 +38,31 @@ custom_listings_n <- custom_listings[custom_listings$neighbourhood == levels(cus
 counts <- custom
 
 
+# Leaflet map
+library(leaflet)
+library(rgdal)
+
+
+nhoods <- rgdal::readOGR("Data/Neighbourhoods/paris.geojson")
+
+ColorPal2 <- colorNumeric(scales::seq_gradient_pal(low = "red", high = "black", 
+                                                   space = "Lab"), domain = c(0,1))
+pal <- colorNumeric("viridis", NULL)
+
+leaflet(nhoods) %>% addTiles() %>%  addPolygons() %>% 
+  addCircleMarkers(~longitude, ~latitude,
+                   popup = ~paste(paste("<b>", name, "</b>"),
+                                  paste("<b>Reviews: </b> ", as.character(number_of_reviews)),
+                                  paste("<b>Price: </b> ", as.character(price), "€"),
+                                  paste("<b>Minimum nights: </b> ", as.character(minimum_nights)),
+                                  paste("<b>Room type: </b> ", as.character(room_type)),
+                                  paste("<b>Host: </b> ", as.character(host_name)),
+                                  sep = "<br/>"), color = ~pal(reviews_per_month), data = listings[1:100,])
+
+
+
+
+hist(listings$price)
 
 
 
