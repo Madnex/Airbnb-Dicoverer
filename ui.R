@@ -62,7 +62,9 @@ shinyUI(
                                   mainPanel(
                                     plotOutput("scatterPlot")
                                   )
-                                )
+                                ),
+                                amChartsOutput("pieChart"),
+                                amChartsOutput("barChartPrice"),
                               )
                             )
                    ),

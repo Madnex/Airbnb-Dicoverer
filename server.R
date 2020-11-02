@@ -9,6 +9,7 @@
 
 library(shiny)
 library(ggplot2)
+library(plyr)
 
 shinyServer(function(input, output, session) {
   listings <- reactive({
@@ -47,6 +48,18 @@ shinyServer(function(input, output, session) {
     p <- p + xlab(names(choicesScatter)[choicesScatter == input$xVarScatter]) + ylab(names(choicesScatter)[choicesScatter == input$yVarScatter])
     p <- p + guides(colour=guide_legend(title="Room Type"))
     p
+  })
+  output$pieChart <- renderAmCharts({
+    stats_by_neighb <- ddply(listings(),~neighbourhood,summarise,count=length(price))
+    names(stats_by_neighb) <- c("label", "value")
+    sorted <- stats_by_neighb[order(stats_by_neighb$value, decreasing = TRUE),]
+    amPie(sorted[1:20,], inner_radius = 50, depth = 10, main="Proportion of number of Listings by neighbourhood (only top 20)")
+  })
+  output$barChartPrice <- renderAmCharts({
+    stats_by_neighb <- ddply(listings(),~neighbourhood,summarise,price=round(mean(price), digits = 2))
+    names(stats_by_neighb) <- c("label", "value")
+    sorted <- stats_by_neighb[order(stats_by_neighb$value, decreasing = TRUE),]
+    amBarplot("label", "value", data = sorted, depth = 10, labelRotation=20, main="Average Price per neighbourhood")
   })
   output$map <- renderLeaflet({
     ColorPal2 <- colorNumeric(scales::seq_gradient_pal(low = "red", high = "black", 

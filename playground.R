@@ -10,7 +10,7 @@ nbhoods <- read.csv("Data/neighbourhoods.csv")
 listings <- listings[ , !(names(listings) %in% c("neighbourhood_group"))]
 
 
-listings <- cityListings[["Lyon"]]
+listings <- cityListings[["Bordeaux"]]
 
 custom_listings <- listings[listings$price < quantile(listings$price, 0.99),]
 
@@ -33,26 +33,11 @@ p <- ggplot(custom_listings) + aes(x=price, y=number_of_reviews, colour=room_typ
 p <- p + xlab("NEW RATING TITLE") + ylab("NEW DENSITY TITLE")
 p <- p + guides(colour=guide_legend(title="New Legend Title"))
 p
-amLegend()
 
-# Leaflet map
-library(leaflet)
-
-ColorPal2 <- colorNumeric(scales::seq_gradient_pal(low = "red", high = "black", 
-                                                   space = "Lab"), domain = c(0,1))
-leaflet(data=listings) %>% addTiles() %>% 
-  addCircleMarkers(~longitude, ~latitude,
-                   popup = ~paste(paste("<b>", name, "</b>"),
-                                  paste("<b>Reviews: </b> ", as.character(number_of_reviews)),
-                                  paste("<b>Price: </b> ", as.character(price), "€"),
-                                  paste("<b>Minimum nights: </b> ", as.character(minimum_nights)),
-                                  paste("<b>Room type: </b> ", as.character(room_type)),
-                                  paste("<b>Host: </b> ", as.character(host_name)),
-                                  sep = "<br/>"), color = ~ColorPal2(reviews_per_month))
+custom_listings_n <- custom_listings[custom_listings$neighbourhood == levels(custom_listings$neighbourhood)[1],]
+counts <- custom
 
 
-
-hist(listings$price)
 
 
 
