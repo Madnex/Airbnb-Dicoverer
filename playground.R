@@ -19,9 +19,6 @@ calendar[calendar$listing_id==695607,]
 
 
 
-listings <- listings[ , !(names(listings) %in% c("neighbourhood_group"))]
-
-
 listings <- cityListings[["Paris"]]
 
 listings[listings$host_id==6792,]
