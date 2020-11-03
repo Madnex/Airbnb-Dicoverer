@@ -7,10 +7,24 @@ listings$neighbourhood <- as.factor(listings$neighbourhood)
 listings$room_type <- as.factor(listings$room_type)
 nbhoods <- read.csv("Data/neighbourhoods.csv")
 
+calendar <- read.csv("Data/Calendar/lyon.csv.gz", colClasses = c("integer", "Date", "factor", "character", "character", "integer", "integer"))
+calendar$price <- sapply(calendar$price, function(u) as.numeric(substr(u, 2, nchar(u))))
+calendar <- calendar[,-5]
+saveRDS(calendar, file = "Data/Calendar/lyon.rds")
+
+filename="paris"
+calendar <- readRDS(paste("Data/Calendar/", filename,".rds", sep=""))
+
+calendar[calendar$listing_id==695607,]
+
+
+
 listings <- listings[ , !(names(listings) %in% c("neighbourhood_group"))]
 
 
 listings <- cityListings[["Paris"]]
+
+listings[listings$host_id==6792,]
 
 custom_listings <- listings[listings$price < quantile(listings$price, 0.99),]
 
