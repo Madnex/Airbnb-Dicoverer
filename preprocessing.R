@@ -1,4 +1,4 @@
-# Generating Preprocessed files
+# Generating Preprocessed files for the calendar as the processing takes a while..
 
 preprocess_calendar <- function(filename){
   calendar <- read.csv(paste("Data/Calendar/raw/", filename, ".csv.gz", sep = ""), 
@@ -11,3 +11,5 @@ preprocess_calendar <- function(filename){
 preprocess_calendar("lyon")
 preprocess_calendar("bordeaux")
 preprocess_calendar("paris")
+preprocess_calendar("munich")
+preprocess_calendar("athens")

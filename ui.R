@@ -13,20 +13,26 @@ library(shinythemes)
 shinyUI(
   navbarPage("Airbnb discovery",
                    theme = shinytheme("yeti"),
-                   
+                   header = fluidPage(
+                     fluidRow(
+                       column(12,
+                              wellPanel(
+                                radioButtons(inputId = "dataset", 
+                                             label = "Selected city", 
+                                             choices = supportedCities, 
+                                             selected = supportedCities[1],
+                                             inline = TRUE
+                                            )
+                              )
+                      )
+                    )
+                   ),
                    tabPanel("Data", 
                             navlistPanel(
                               widths = c(2,10),
                               tabPanel(
-                                "Data",
-                                sidebarLayout(
-                                  sidebarPanel(
-                                    radioButtons(inputId = "dataset", label = "City", choices = supportedCities, selected = supportedCities[1])
-                                  ),
-                                  mainPanel(
-                                    verbatimTextOutput("summaryData")
-                                  )
-                                )
+                                "Summary",
+                                verbatimTextOutput("summaryData")
                               ),
                               tabPanel(
                                 "Details",
@@ -61,9 +67,23 @@ shinyUI(
                                   mainPanel(
                                     plotOutput("scatterPlot")
                                   )
-                                ),
+                                )
+                              ),
+                              tabPanel(
+                                "Calendar",
+                                sidebarLayout(
+                                  sidebarPanel(
+                                    uiOutput("selectHostForGant")
+                                  ),
+                                  mainPanel(
+                                    plotOutput("gantchartIDs")
+                                  )
+                                )
+                              ),
+                              tabPanel(
+                                "Neighbourhoods",
                                 amChartsOutput("pieChart"),
-                                amChartsOutput("barChartPrice"),
+                                amChartsOutput("barChartPrice")
                               )
                             )
                    ),
@@ -72,7 +92,10 @@ shinyUI(
                              sidebarPanel(
                                uiOutput("maxPriceSlider"),
                                uiOutput("minNightsSlider"),
-                               uiOutput("roomTypesCheckbox")
+                               uiOutput("roomTypesCheckbox"),
+                               radioButtons("nhoodValue", "Neighbourhood color by:", 
+                                            choices = c("Number of Listings"="count", "Average Price"="avgPrice",
+                                                        "Number of Reviews"="nReviews"), selected = "count")
                              ),
                              
                              # Show a plot of the generated distribution

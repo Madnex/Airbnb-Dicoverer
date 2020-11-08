@@ -5,6 +5,7 @@ library(ggplot2)
 library(leaflet)
 library(rgdal)
 library(rAmCharts)
+library(shinyWidgets)
 
 ####################################################
 # Data
@@ -26,10 +27,24 @@ read_calendar <- function(filename){
   return(calendar)
 }
 
-supportedCities <- list("Paris", "Lyon", "Bordeaux")
-cityListings <- list(Paris=read_data("paris"), Lyon=read_data("lyon"), Bordeaux=read_data("bordeaux"))
-cityNhoods <- list(Paris=read_nhoods("paris"), Lyon=read_nhoods("lyon"), Bordeaux=read_nhoods("bordeaux"))
-cityCalendar <- list(Paris=read_calendar("paris"), Lyon=read_calendar("lyon"), Bordeaux=read_calendar("bordeaux"))
+supportedCities <- list("Lyon", "Bordeaux", "Munich", "Athens")
+
+# Loading the data variables cityListings, cityNhoods and cityCalendar
+cityListings <- lapply(supportedCities, function(u){
+  read_data(tolower(u))
+})
+names(cityListings) <- supportedCities
+
+cityNhoods <- lapply(supportedCities, function(u){
+  read_nhoods(tolower(u))
+})
+names(cityNhoods) <- supportedCities
+
+cityCalendar <- lapply(supportedCities, function(u){
+  read_calendar(tolower(u))
+})
+names(cityCalendar) <- supportedCities
+
 
 ####################################################
 # Choices for displaying value and key:
