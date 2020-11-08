@@ -27,82 +27,89 @@ shinyUI(
                       )
                     )
                    ),
-                   tabPanel("Data", 
-                            navlistPanel(
-                              widths = c(2,10),
-                              tabPanel(
-                                "Summary",
-                                verbatimTextOutput("summaryData")
-                              ),
-                              tabPanel(
-                                "Details",
-                                dataTableOutput("allInfo")
-                              ),
-                              tabPanel(
-                                "Descriptive Stats",
-                                sidebarLayout(
-                                  sidebarPanel(
-                                    selectInput("barplot_var", "Select Variable", choices = c("Room Type", "Neighbourhood"), selected = "room_type")
-                                  ),
-                                  mainPanel(
-                                    plotOutput("barplot"),
-                                  )
-                                ),
-                                sidebarLayout(
-                                  sidebarPanel(
-                                    sliderInput("quantileHist", "Select quantile to cutoff", min=0.1, max=1, step=0.01, value=0.99),
-                                    sliderInput("barsHist", "Select number of bins", min=1, max=300, step=1, value=100),
-                                    selectInput("varHist", "Select variable", choices = choicesHistogram)
-                                  ),
-                                  mainPanel(
-                                    amChartsOutput("histograms")
-                                  )
-                                ),
-                                sidebarLayout(
-                                  sidebarPanel(
-                                    sliderInput("quantileScatterX", "Select quantile to cutoff x", min=0.1, max=1, step=0.01, value=0.99),
-                                    selectInput("xVarScatter", "Select variable for x", choices = choicesScatter, selected = choicesScatter[1]),
-                                    selectInput("yVarScatter", "Select variable for y", choices = choicesScatter, selected = choicesScatter[2])
-                                  ),
-                                  mainPanel(
-                                    plotOutput("scatterPlot")
-                                  )
-                                )
-                              ),
-                              tabPanel(
-                                "Calendar",
-                                sidebarLayout(
-                                  sidebarPanel(
-                                    uiOutput("selectHostForGant")
-                                  ),
-                                  mainPanel(
-                                    plotOutput("gantchartIDs")
-                                  )
-                                )
-                              ),
-                              tabPanel(
-                                "Neighbourhoods",
-                                amChartsOutput("pieChart"),
-                                amChartsOutput("barChartPrice")
-                              )
+             tabPanel("Info",
+                      fluidPage(
+                        fluidRow(
+                          includeMarkdown("infoPage.md")
+                        )
+                      )
+             ),
+             tabPanel("Data", 
+                      navlistPanel(
+                        widths = c(2,10),
+                        tabPanel(
+                          "Summary",
+                          verbatimTextOutput("summaryData")
+                        ),
+                        tabPanel(
+                          "Details",
+                          dataTableOutput("allInfo")
+                        ),
+                        tabPanel(
+                          "Descriptive Stats",
+                          sidebarLayout(
+                            sidebarPanel(
+                              selectInput("barplot_var", "Select Variable", choices = c("Room Type", "Neighbourhood"), selected = "room_type")
+                            ),
+                            mainPanel(
+                              plotOutput("barplot"),
                             )
-                   ),
-                  tabPanel("Explore",
-                           sidebarLayout(
-                             sidebarPanel(
-                               uiOutput("maxPriceSlider"),
-                               uiOutput("minNightsSlider"),
-                               uiOutput("roomTypesCheckbox"),
-                               radioButtons("nhoodValue", "Neighbourhood color by:", 
-                                            choices = c("Number of Listings"="count", "Average Price"="avgPrice",
-                                                        "Number of Reviews"="nReviews"), selected = "count")
-                             ),
-                             
-                             # Show a plot of the generated distribution
-                             mainPanel(
-                               leafletOutput("map")
-                             )
-                           )
-                  )
+                          ),
+                          sidebarLayout(
+                            sidebarPanel(
+                              sliderInput("quantileHist", "Select quantile to cutoff", min=0.1, max=1, step=0.01, value=0.99),
+                              sliderInput("barsHist", "Select number of bins", min=1, max=300, step=1, value=100),
+                              selectInput("varHist", "Select variable", choices = choicesHistogram)
+                            ),
+                            mainPanel(
+                              amChartsOutput("histograms")
+                            )
+                          ),
+                          sidebarLayout(
+                            sidebarPanel(
+                              sliderInput("quantileScatterX", "Select quantile to cutoff x", min=0.1, max=1, step=0.01, value=0.99),
+                              selectInput("xVarScatter", "Select variable for x", choices = choicesScatter, selected = choicesScatter[1]),
+                              selectInput("yVarScatter", "Select variable for y", choices = choicesScatter, selected = choicesScatter[2])
+                            ),
+                            mainPanel(
+                              plotOutput("scatterPlot")
+                            )
+                          )
+                        ),
+                        tabPanel(
+                          "Calendar",
+                          sidebarLayout(
+                            sidebarPanel(
+                              uiOutput("selectHostForGant")
+                            ),
+                            mainPanel(
+                              plotOutput("gantchartIDs")
+                            )
+                          )
+                        ),
+                        tabPanel(
+                          "Neighbourhoods",
+                          amChartsOutput("pieChart"),
+                          amChartsOutput("barChartPrice")
+                        )
+                      )
+             ),
+            tabPanel("Explore",
+                     sidebarLayout(
+                       sidebarPanel(
+                         uiOutput("maxPriceSlider"),
+                         uiOutput("minNightsSlider"),
+                         uiOutput("roomTypesCheckbox"),
+                         radioButtons("nhoodValue", "Neighbourhood color by:", 
+                                      choices = c("Number of Listings"="count", "Average Price"="avgPrice",
+                                                  "Number of Reviews"="nReviews"), selected = "count")
+                       ),
+                       
+                       # Show a plot of the generated distribution
+                       mainPanel(
+                         leafletOutput("map")
+                       )
+                     )
+            )
   )
 )
