@@ -2,9 +2,10 @@
 
 Discover data from Airbnb. Visually. Dynamically. Simple.
 
+# To-Do
 * Per Host Filter/Analysis for map (filter by host) and plots (number of listings by host, prices by host)
-* Neighborhoods color
-* Calendar time series..
+* Neighborhoods names when onclick
+* Map show available dates for listing when selected
 * External data sources (supermarkets etc.)
 * Random plots
 

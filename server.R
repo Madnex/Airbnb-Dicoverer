@@ -18,11 +18,56 @@ shinyServer(function(input, output, session) {
   listings <- reactive({
     cityListings[[input$dataset]]
   })
+  
   nhoods <- reactive({
     cityNhoods[[input$dataset]]
   })
+  
   calendar <- reactive({
     cityCalendar[[input$dataset]]
+  })
+  
+  clickVal <- eventReactive(input$map_marker_click,{
+    click<-input$map_marker_click
+    if(is.null(click))
+      return()
+    click$id
+  })
+  
+  gantDataForMap <- reactive({
+    id <- clickVal()
+    if(is.null(id))
+      return()
+    myCalendar <- calendar()
+    myID <- myCalendar[myCalendar$listing_id==id,]
+    if (dim(myID)[1] == 0)
+      return()
+    tmp <- data.frame(day=myID$date, value=as.numeric(myID$available)-1)
+    tmp$group <- cumsum(c(1, diff(tmp$value) != 0))
+    booking <- tmp %>% group_by(group) %>% summarise(start_day=min(day), end_day=max(day))
+    booking$value <- sapply(booking$group, function(u) {
+      day <- booking$start_day[booking$group==u]
+      return (tmp$value[tmp$day==day])
+    })
+    booking <- booking[booking$value==1,]
+    if (dim(booking)[1] == 0)
+      return()
+    g.gantt <- gather(booking, "state", "date", 2:3)
+    g.gantt$value <- as.factor(g.gantt$value)
+    g.gantt$Listing_ID <- id
+    g.gantt$group <- paste(g.gantt$Listing_ID, g.gantt$group, sep = "_")
+    g.gantt$Listing_ID <- as.factor(g.gantt$Listing_ID)
+    
+    if(dim(g.gantt)[1]!=0){
+      start_m <- min(g.gantt$date)
+      end_m <- max(g.gantt$date)
+    } else{
+      start_m <- min(myCalendar$date)
+      end_m <- max(myCalendar$date)
+    }
+    seqs <- seq.Date(start_m, end_m, "month")
+    
+    return(list(data=g.gantt, seqs=seqs))
   })
   
   #####################################
@@ -32,6 +77,10 @@ shinyServer(function(input, output, session) {
     summary(listings())
   })
   
+  output$clickValMap <- renderText({
+    as.character(clickVal())
+  })
+  
   output$maxPriceSlider <- renderUI({
     # Creating a nice slider to allow for a good range and also the possibility to 
     # select even the extreme outliers
@@ -39,7 +88,7 @@ shinyServer(function(input, output, session) {
     slideRanges <- c(round(seq(min(price), quantile(price, 0.9), length.out = 49)), max(price))
     sliderTextInput("maxPrice", "Maximal Price", 
                 choices = slideRanges,
-                selected = slideRanges[25])
+                selected = slideRanges[10])
   })
   
   output$minNightsSlider <- renderUI({
@@ -155,11 +204,29 @@ shinyServer(function(input, output, session) {
       theme_gray(base_size=14)
   })
   
+  output$messageNoAvailability <- renderText({
+    if(is.null(gantDataForMap()))
+      return("This listing is not available at all :(")
+    return("This listing is available on the following dates:")
+  })
+  output$gantChartForMap <- renderPlot({
+    data <- gantDataForMap()
+    if(is.null(data))
+      return()
+    g.gantt <- data$data
+    seqs <- data$seqs
+    ggplot(g.gantt, aes(date, Listing_ID, color = Listing_ID, group=group)) + 
+      geom_line(size = 20) +
+      labs(x="Availability", y=NULL, title=paste("Available timelines for listing", id)) +
+      scale_x_date(breaks=seqs, labels=strftime(seqs, "%b %y")) +
+      theme_gray(base_size=14) + theme(legend.position = "none")
+  })
+  
   output$map <- renderLeaflet({
     # Predefined stuff:
     pal <- colorNumeric("Reds", NULL)
     palNhoods <- colorNumeric("viridis", NULL)
-    myListings <- listings()[1:300,] # Taking only a small subset for now to test stuff..
+    myListings <- listings()#[1:300,] # Taking only a small subset for now to test stuff..
     myNhoods <- nhoods()
     
     customdata <- myListings[myListings$price <= input$maxPrice,]
@@ -178,16 +245,16 @@ shinyServer(function(input, output, session) {
     
     
     leaflet(data=myNhoods) %>% addTiles() %>% addPolygons(fillColor = ~palNhoods(value)) %>% 
-      addCircles(~longitude, ~latitude,
+      addCircleMarkers(~longitude, ~latitude, layerId=~id,
                        popup = ~paste(paste("<b>", name, "</b>"),
                                       paste("<b>Reviews: </b> ", as.character(number_of_reviews)),
                                       paste("<b>Price: </b> ", as.character(price), "€"),
                                       paste("<b>Minimum nights: </b> ", as.character(minimum_nights)),
                                       paste("<b>Room type: </b> ", as.character(room_type)),
                                       paste("<b>Host: </b> ", as.character(host_name)),
-                                      paste("<b>Link: <a href='https://www.airbnb.com/rooms/", as.character(id), "'>Airbnb</a>", sep = ""),
+                                      paste("<b>Link: <a href='https://www.airbnb.com/rooms/", as.character(id), "' target='_blank'>Airbnb</a>", sep = ""),
                                       sep = "<br/>"),
-                       color = ~pal(price), data = customdata, radius = 50, opacity = 0.7) %>% 
+                       color = ~pal(price), data = customdata, radius = 2, opacity = 0.7) %>% 
                       addLegend("bottomright", pal = palNhoods, values = ~value,
                            title = "Neighbourhood",
                            labFormat = labelFormat(suffix = labelNhood),

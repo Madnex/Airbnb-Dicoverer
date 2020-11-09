@@ -107,7 +107,10 @@ shinyUI(
                        
                        # Show a plot of the generated distribution
                        mainPanel(
-                         leafletOutput("map")
+                         leafletOutput("map"),
+                         verbatimTextOutput("clickValMap"),
+                         textOutput("messageNoAvailability"),
+                         plotOutput("gantChartForMap")
                        )
                      )
             )
