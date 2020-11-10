@@ -5,8 +5,8 @@ account: madnex
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3185202
-bundleId: 3834203
+bundleId: 3839428
 url: https://madnex.shinyapps.io/Airbnb/
-when: 1604847331.96446
+when: 1604959016.25286
 asMultiple: FALSE
 asStatic: FALSE
