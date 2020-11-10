@@ -29,7 +29,7 @@ shinyUI(
                    ),
              tabPanel("Info",
                       fluidPage(
-                        fluidRow(
+                        column(6, offset = 3,
                           includeMarkdown("infoPage.md")
                         )
                       )
@@ -109,7 +109,7 @@ shinyUI(
                        mainPanel(
                          leafletOutput("map"),
                          verbatimTextOutput("clickValMap"),
-                         textOutput("messageNoAvailability"),
+                         uiOutput("availableText"),
                          plotOutput("gantChartForMap")
                        )
                      )
