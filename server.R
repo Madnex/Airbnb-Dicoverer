@@ -217,7 +217,7 @@ shinyServer(function(input, output, session) {
     seqs <- data$seqs
     ggplot(g.gantt, aes(date, Listing_ID, color = Listing_ID, group=group)) + 
       geom_line(size = 20) +
-      labs(x="Availability", y=NULL, title=paste("Available timelines for listing", id)) +
+      labs(x="Availability", y=NULL, title=paste("Available timelines for listing", clickVal())) +
       scale_x_date(breaks=seqs, labels=strftime(seqs, "%b %y")) +
       theme_gray(base_size=14) + theme(legend.position = "none")
   })
