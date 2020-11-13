@@ -91,6 +91,18 @@ shinyUI(
                           "Neighbourhoods",
                           amChartsOutput("pieChart"),
                           amChartsOutput("barChartPrice")
+                        ),
+                        tabPanel(
+                          "Hosts",
+                          amChartsOutput("barChartListHost"),
+                          sidebarLayout(
+                            sidebarPanel(
+                              uiOutput("selectHostForPrices")
+                            ),
+                            mainPanel(
+                              amChartsOutput("boxplotHost")
+                            )
+                          )
                         )
                       )
              ),

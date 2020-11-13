@@ -115,6 +115,14 @@ shinyServer(function(input, output, session) {
                        selected = choicesHosts[1])
   })
   
+  output$selectHostForPrices <- renderUI({
+    byHost <- listings() %>% group_by(host_id) %>% summarise(listings=length(host_id))
+    choicesHosts <- c(byHost[byHost$listings >= 3 & byHost$listings <= 180,1])
+    selectInput("HostForPrices", "Host", 
+                choices = choicesHosts, 
+                selected = choicesHosts[1])
+  })
+  
   output$barplot <- renderPlot({
     xdata <- if(input$barplot_var == "Neighbourhood") "neighbourhood" else "room_type"
     ggplot(listings()) + aes_string(x=xdata) + geom_bar() + labs(y="Number of Listings", x=input$barplot_var) + coord_flip()
@@ -151,6 +159,37 @@ shinyServer(function(input, output, session) {
     amBarplot("label", "value", data = sorted, depth = 10, labelRotation=20, main="Average Price per neighbourhood")
   })
   
+
+  output$boxplotHost <- renderAmCharts({
+    # plotting the prices of all listings of a given host 
+    # The host has to have at least 3 listings to allow for a nice plot, therefore only those
+    # hosts are selectable (see output$selectHostForPrice)
+    
+    myListings <- listings()
+    
+    ids <- unique(myListings$host_id[myListings$host_id==input$HostForPrices])
+    allGant <- data.frame(matrix(ncol=2, nrow=0))
+    colnames(allGant) <- c("price", "ID")
+    
+    for(i in 1:length(ids)){
+      id <- ids[i]
+      myID <- myListings[myListings$host_id==id,]
+      if(dim(myID)[1]!=0){
+        tmp <- data.frame(price=myID$price, ID=id)
+        allGant <- rbind(allGant, tmp)
+      }
+    }
+    allGant$ID <- as.factor(allGant$ID)
+    
+    amBoxplot(price ~ ID, data = allGant, main = "Prices distribution")
+  })
+
+  output$barChartListHost <- renderAmCharts({
+    stats_by_host <- ddply(listings(),~as.character(host_id),summarise,count=length(price))
+    names(stats_by_host) <- c("label", "value")
+    sorted <- stats_by_host[order(stats_by_host$value, decreasing = TRUE),]
+    amBarplot("label", "value", data = sorted[1:30,], depth = 10, labelRotation=20, main="Number of Listings per Host (only top 30)")
+  })
   output$allInfo <- renderDataTable(listings())
   
   output$gantchartIDs <- renderPlot({
