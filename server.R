@@ -27,10 +27,14 @@ shinyServer(function(input, output, session) {
     cityCalendar[[input$dataset]]
   })
   
+  wasClicked <- reactiveVal(FALSE)
   clickVal <- eventReactive(input$map_marker_click,{
+    wasClicked(TRUE)
     click<-input$map_marker_click
-    if(is.null(click))
+    if(is.null(click)){
+      wasClicked(FALSE)
       return()
+    }
     click$id
   })
   
@@ -78,7 +82,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$clickValMap <- renderText({
-    as.character(clickVal())
+    paste("You selected the listing with id:", as.character(clickVal()))
   })
   
   output$maxPriceSlider <- renderUI({
@@ -243,11 +247,14 @@ shinyServer(function(input, output, session) {
       theme_gray(base_size=14)
   })
   
-  output$messageNoAvailability <- renderText({
+  output$availableText <- renderUI({
+    if(!wasClicked())
+      return(HTML("<h3>Click on a listing to find out about it's availability :)</h3>"))
     if(is.null(gantDataForMap()))
-      return("This listing is not available at all :(")
-    return("This listing is available on the following dates:")
+      return(HTML("<h3>This listing is not available at all :(</h3>"))
+    return(HTML("<h3>This listing is available on the following dates:</h3>"))
   })
+  
   output$gantChartForMap <- renderPlot({
     data <- gantDataForMap()
     if(is.null(data))
@@ -278,12 +285,16 @@ shinyServer(function(input, output, session) {
     
     stats_by_neighb$neighbourhood <- sapply(stats_by_neighb$neighbourhood, as.character)
     joinedN <-join(data.frame(neighbourhood=myNhoods$neighbourhood), stats_by_neighb, by="neighbourhood")
-    if (selValue=="count"){myNhoods$value <- joinedN$count; labelNhood <- " Listings"}
-    else if (selValue=="avgPrice"){myNhoods$value <- joinedN$avgPrice; labelNhood <- " $"}
-    else {myNhoods$value <- joinedN$nReviews; labelNhood <- " Reviews"}
+    if (selValue=="count"){myNhoods$value <- joinedN$count; labelNhood <- " Listings"; labelNhoodPopUp <- "Listings:"}
+    else if (selValue=="avgPrice"){myNhoods$value <- joinedN$avgPrice; labelNhood <- " $"; labelNhoodPopUp <- "Avg. Price ($):"}
+    else {myNhoods$value <- joinedN$nReviews; labelNhood <- " Reviews"; labelNhoodPopUp <- "Reviews:"}
     
     
-    leaflet(data=myNhoods) %>% addTiles() %>% addPolygons(fillColor = ~palNhoods(value)) %>% 
+    leaflet(data=myNhoods) %>% addTiles() %>% addPolygons(fillColor = ~palNhoods(value), 
+                                                          popup = ~paste(paste("<b>", neighbourhood, "</b>"),
+                                                                         paste("<b>", labelNhoodPopUp, "</b>", round(value)),
+                                                                         sep = "<br/>")
+                                                          ) %>% 
       addCircleMarkers(~longitude, ~latitude, layerId=~id,
                        popup = ~paste(paste("<b>", name, "</b>"),
                                       paste("<b>Reviews: </b> ", as.character(number_of_reviews)),
