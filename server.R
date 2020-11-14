@@ -30,6 +30,12 @@ shinyServer(function(input, output, session) {
     cityPOI[[input$dataset]]
   })
   
+  linearModel <- reactive({
+    selection <- input$lmSelection
+    myListings <-  select(listings(), selection, price)
+    lm(price~., data = myListings)
+  })
+  
   wasClicked <- reactiveVal(FALSE)
   clickVal <- eventReactive(input$map_marker_click,{
     wasClicked(TRUE)
@@ -112,6 +118,13 @@ shinyServer(function(input, output, session) {
     checkboxGroupInput("roomTypes", "Room Type", 
                        choices = levels(listings()$room_type), 
                        selected = levels(listings()$room_type))
+  })
+  
+  output$lmSelectionCheckbox <- renderUI({
+    vars <- c("neighbourhood", "latitude", "longitude", "room_type", "number_of_reviews")
+    checkboxGroupInput("lmSelection", "Variables", 
+                       choices = vars, 
+                       selected = vars)
   })
   
   output$poiCategoryRadio <- renderUI({
@@ -358,5 +371,10 @@ shinyServer(function(input, output, session) {
                                     data = myPois)
     }
     myMap
+  })
+  
+  output$lmSummary <- renderPrint({
+    myLM <- linearModel()
+    summary(myLM)
   })
 })

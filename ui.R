@@ -128,6 +128,18 @@ shinyUI(
                          plotOutput("gantChartForMap")
                        )
                      )
+            ),
+            tabPanel("Linear Model",
+                     sidebarLayout(
+                       sidebarPanel(
+                         uiOutput("lmSelectionCheckbox")
+                       ),
+                       
+                       # Show a plot of the generated distribution
+                       mainPanel(
+                         verbatimTextOutput("lmSummary")
+                       )
+                     )
             )
   )
 )
