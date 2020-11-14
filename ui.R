@@ -115,12 +115,15 @@ shinyUI(
                          uiOutput("roomTypesCheckbox"),
                          radioButtons("nhoodValue", "Neighbourhood color by:", 
                                       choices = c("Number of Listings"="count", "Average Price"="avgPrice",
-                                                  "Number of Reviews"="nReviews"), selected = "count")
+                                                  "Number of Reviews"="nReviews"), selected = "count"),
+                         checkboxInput("showPOIs", "Show Points of Interest"),
+                         uiOutput("poiCategoryRadio"),
+                         uiOutput("poiSubCategoryCheckbox"),
                        ),
                        
                        # Show a plot of the generated distribution
                        mainPanel(
-                         leafletOutput("map"),
+                         leafletOutput("map", height = "70vh"),
                          verbatimTextOutput("clickValMap"),
                          uiOutput("availableText"),
                          plotOutput("gantChartForMap")

@@ -7,25 +7,7 @@ library(rgdal)
 library(rAmCharts)
 library(shinyWidgets)
 
-####################################################
-# DATA
-####################################################
-
-read_data <- function(filename){
-  listings <- read.csv(paste("Data/Listings/", filename, ".csv", sep = ""))
-  listings$neighbourhood <- as.factor(listings$neighbourhood)
-  listings$room_type <- as.factor(listings$room_type)
-  listings <- listings[ , !(names(listings) %in% c("neighbourhood_group"))]
-  return(listings)
-}
-read_nhoods <- function(filename){
-  nhoods <- rgdal::readOGR(paste("Data/Neighbourhoods/", filename, ".geojson", sep = ""))
-  return(nhoods)
-}
-read_calendar <- function(filename){
-  calendar <- readRDS(paste("Data/Calendar/", filename,".rds", sep=""))
-  return(calendar)
-}
+source('read_data.R')
 
 ####################################################
 # SUPPORTED CITIES
@@ -33,13 +15,13 @@ read_calendar <- function(filename){
 # Paris is not supported on shinyapps.io since it takes too much ram, however, if you
 # run this app locally you can simply add "Paris" here to see it as well.
 
-supportedCities <- list("Lyon", "Bordeaux", "Munich", "Athens")
+supportedCities <- list("Brussels", "Edinburgh", "Lyon", "Bordeaux", "Munich", "Athens")
 
 ####################################################
 
-# Loading the data variables cityListings, cityNhoods and cityCalendar
+# Loading the data variables cityListings, cityNhoods, cityCalendar and cityPOI
 cityListings <- lapply(supportedCities, function(u){
-  read_data(tolower(u))
+  read_listings(tolower(u))
 })
 names(cityListings) <- supportedCities
 
@@ -52,6 +34,11 @@ cityCalendar <- lapply(supportedCities, function(u){
   read_calendar(tolower(u))
 })
 names(cityCalendar) <- supportedCities
+
+cityPOI <- lapply(supportedCities, function(u){
+  read_pois(tolower(u))
+})
+names(cityPOI) <- supportedCities
 
 
 ####################################################
