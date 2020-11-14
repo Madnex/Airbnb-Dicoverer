@@ -109,6 +109,7 @@ shinyUI(
             tabPanel("Explore",
                      sidebarLayout(
                        sidebarPanel(
+                         uiOutput("selectHostForMap"),
                          uiOutput("maxPriceSlider"),
                          uiOutput("minNightsSlider"),
                          uiOutput("roomTypesCheckbox"),
