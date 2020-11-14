@@ -4,9 +4,7 @@ Discover data from Airbnb. Visually. Dynamically. Simple.
 
 # To-Do
 * Per Host Filter/Analysis for map (filter by host)
-* External data sources (supermarkets etc.)
 * Linear Model
-* some more cities
 
 # Project Structure
 ## Algorithms
@@ -39,6 +37,7 @@ Additionally, there is a second source of data for the points of interests. It i
 The description of the data can be found here: http://www.slipo.eu/?p=1551
 
 To add the files to this app, the appropriate file has to be downloaded (based on the country or region). The dowloaded file needs to be extracted and the corresponding csv file (in a subfolder of the extracted folder) needs to be compressed into a .gz format. With the naming convention: nameofthecity-pois.osm.csv.gz
+This file needs to go into the folder Data/POIs/raw and then the preprocessing for this cit needs to be done. Analogue to the preprocessing of the calendar data.
 
 It can be easily extended to more cites. The only limitation is your RAM. The only version of this app (https://madnex.shinyapps.io/Airbnb/) is limited to 1GB RAM. This is why some big cities would by themselves demand most of  the RAM here and only some "minor" cities are shown. 
 
