@@ -127,6 +127,14 @@ shinyServer(function(input, output, session) {
                 selected = choicesHosts[1])
   })
   
+  output$selectHostForMap <- renderUI({
+    byHost <- listings() %>% group_by(host_id,host_name) %>% summarise(listings=length(host_id))
+    choicesHosts <- c("No host selected",paste(byHost$host_name, byHost$host_id, sep = "_"))
+    selectInput("HostForMap", "Select a host", 
+                choices = choicesHosts,
+                            selected = choicesHosts[1])
+  })
+  
   output$barplot <- renderPlot({
     xdata <- if(input$barplot_var == "Neighbourhood") "neighbourhood" else "room_type"
     ggplot(listings()) + aes_string(x=xdata) + geom_bar() + labs(y="Number of Listings", x=input$barplot_var) + coord_flip()
@@ -276,8 +284,15 @@ shinyServer(function(input, output, session) {
     myNhoods <- nhoods()
     
     customdata <- myListings[myListings$price <= input$maxPrice,]
-    customdata <- customdata[customdata$minimum_nights <= input$minNights,]
+    customdata <- customdata[customdata$minimum_nights == input$minNights,]
     customdata <- customdata[customdata$room_type %in% input$roomTypes,]
+    #print(input$HostForMap)
+    if(!is.null(input$HostForMap)){
+      if (input$HostForMap != "No host selected"){
+        customdata <- customdata[customdata$host_id == strsplit(input$HostForMap, "_")[[1]][2],]
+      }
+    }
+   
     
     # Neighbourhoods
     selValue <- input$nhoodValue
