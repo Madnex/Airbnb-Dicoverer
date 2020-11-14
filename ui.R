@@ -122,7 +122,7 @@ shinyUI(
                        
                        # Show a plot of the generated distribution
                        mainPanel(
-                         leafletOutput("map"),
+                         leafletOutput("map", height = "70vh"),
                          verbatimTextOutput("clickValMap"),
                          uiOutput("availableText"),
                          plotOutput("gantChartForMap")

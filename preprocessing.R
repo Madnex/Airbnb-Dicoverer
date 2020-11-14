@@ -1,5 +1,7 @@
 # Generating Preprocessed files for the calendar as the processing takes a while..
 
+source('read_data.R')
+
 preprocess_calendar <- function(filename){
   calendar <- read.csv(paste("Data/Calendar/raw/", filename, ".csv.gz", sep = ""), 
                        colClasses = c("integer", "Date", "factor", "character", "character", "integer", "integer"))
@@ -15,3 +17,32 @@ preprocess_calendar("munich")
 preprocess_calendar("athens")
 preprocess_calendar("edinburgh")
 preprocess_calendar("brussels")
+
+preprocess_pois <- function(filename){
+  pois <- read.csv(paste("Data/POIs/raw/", filename,"-pois.osm.csv.gz", sep=""), header = TRUE, sep = "|")
+  # Filter for area square
+  camelCase <- paste(toupper(substring(filename, 1,1)),substring(filename, 2), sep = "")
+  listings <- read_listings(filename)
+  c_lat <- mean(listings$latitude)
+  c_lon <- mean(listings$longitude)
+  # Select only a circle around the center of the city
+  r <- 0.05
+  lon <- pois$LON - c_lon
+  lat <- pois$LAT - c_lat
+  area_sel <- lon**2 + lat**2 < r**2 
+  # Filter for category
+  boring <- pois$CATEGORY %in% c("BUSINESS", "RELIGIOUS", "EDUCATION", "LANDUSE",
+                                 "AUTOMOTIVE", "SETTLEMENTS", "HEALTH", "ACCOMMODATION", 
+                                 "PUBLICSERVICE", "TRANSPORT")
+  localPOI <- pois[area_sel & !boring,]
+  localPOI$CATEGORY <- as.factor(localPOI$CATEGORY)
+  localPOI$SUBCATEGORY <- as.factor(localPOI$SUBCATEGORY)
+  saveRDS(localPOI, file = paste("Data/POIs/", filename,".rds", sep = ""))
+}
+
+preprocess_pois("lyon")
+preprocess_pois("bordeaux")
+preprocess_pois("munich")
+preprocess_pois("athens")
+preprocess_pois("edinburgh")
+preprocess_pois("brussels")

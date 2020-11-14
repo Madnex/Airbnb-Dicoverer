@@ -7,47 +7,7 @@ library(rgdal)
 library(rAmCharts)
 library(shinyWidgets)
 
-####################################################
-# DATA
-####################################################
-
-read_data <- function(filename){
-  listings <- read.csv(paste("Data/Listings/", filename, ".csv", sep = ""))
-  listings$neighbourhood <- as.factor(listings$neighbourhood)
-  listings$room_type <- as.factor(listings$room_type)
-  listings <- listings[ , !(names(listings) %in% c("neighbourhood_group"))]
-  return(listings)
-}
-read_nhoods <- function(filename){
-  nhoods <- rgdal::readOGR(paste("Data/Neighbourhoods/", filename, ".geojson", sep = ""))
-  return(nhoods)
-}
-read_calendar <- function(filename){
-  calendar <- readRDS(paste("Data/Calendar/", filename,".rds", sep=""))
-  return(calendar)
-}
-read_pois <- function(filename){
-  pois <- read.csv(paste("Data/POIs/", filename,"-pois.osm.csv.gz", sep=""), header = TRUE, sep = "|")
-  # Filter for area square
-  camelCase <- paste(toupper(substring(filename, 1,1)),substring(filename, 2), sep = "")
-  listings <- cityListings[[camelCase]]
-  c_lat <- mean(listings$latitude)
-  c_lon <- mean(listings$longitude)
-  # Select only a circle around the center of the city
-  r <- 0.05
-  lon <- pois$LON - c_lon
-  lat <- pois$LAT - c_lat
-  area_sel <- lon**2 + lat**2 < r**2 
-  # Filter for category
-  boring <- pois$CATEGORY %in% c("BUSINESS", "RELIGIOUS", "EDUCATION", "LANDUSE",
-                                    "AUTOMOTIVE", "SETTLEMENTS", "HEALTH", "ACCOMMODATION", 
-                                    "PUBLICSERVICE", "TRANSPORT")
-  localPOI <- pois[area_sel & !boring,]
-  localPOI$CATEGORY <- as.factor(localPOI$CATEGORY)
-  localPOI$SUBCATEGORY <- as.factor(localPOI$SUBCATEGORY)
-
-  return(localPOI)
-}
+source('read_data.R')
 
 ####################################################
 # SUPPORTED CITIES
@@ -59,9 +19,9 @@ supportedCities <- list("Brussels", "Edinburgh", "Lyon", "Bordeaux", "Munich", "
 
 ####################################################
 
-# Loading the data variables cityListings, cityNhoods and cityCalendar
+# Loading the data variables cityListings, cityNhoods, cityCalendar and cityPOI
 cityListings <- lapply(supportedCities, function(u){
-  read_data(tolower(u))
+  read_listings(tolower(u))
 })
 names(cityListings) <- supportedCities
 
