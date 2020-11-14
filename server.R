@@ -26,12 +26,15 @@ shinyServer(function(input, output, session) {
   calendar <- reactive({
     cityCalendar[[input$dataset]]
   })
+  pois <- reactive({
+    cityPOI[[input$dataset]]
+  })
   
   wasClicked <- reactiveVal(FALSE)
   clickVal <- eventReactive(input$map_marker_click,{
     wasClicked(TRUE)
     click<-input$map_marker_click
-    if(is.null(click)){
+    if(is.null(click) || typeof(click$id)=="character" ){
       wasClicked(FALSE)
       return()
     }
@@ -109,6 +112,29 @@ shinyServer(function(input, output, session) {
     checkboxGroupInput("roomTypes", "Room Type", 
                        choices = levels(listings()$room_type), 
                        selected = levels(listings()$room_type))
+  })
+  
+  output$poiCategoryRadio <- renderUI({
+    if(!input$showPOIs)
+      return()
+    cats <- levels(pois()$CATEGORY)
+    selection <- if("TOURISM" %in% cats) "TOURISM" else cats[1]
+    radioButtons("poiCategory", "Category of POI", 
+                       choices = cats, 
+                       selected = selection)
+  })
+  
+  output$poiSubCategoryCheckbox <- renderUI({
+    if(!input$showPOIs)
+      return()
+    cat <- input$poiCategory
+    myPois <- pois()
+    myPois <- myPois[myPois$CATEGORY==cat,]
+    selections <- unique(myPois$SUBCATEGORY)
+    selectInput("poiSubCategory", "Subcategory of POI", 
+                 choices = selections, 
+                 selected = NULL, 
+                multiple = TRUE)
   })
   
   output$selectHostForGant <- renderUI({
@@ -289,8 +315,7 @@ shinyServer(function(input, output, session) {
     else if (selValue=="avgPrice"){myNhoods$value <- joinedN$avgPrice; labelNhood <- " $"; labelNhoodPopUp <- "Avg. Price ($):"}
     else {myNhoods$value <- joinedN$nReviews; labelNhood <- " Reviews"; labelNhoodPopUp <- "Reviews:"}
     
-    
-    leaflet(data=myNhoods) %>% addTiles() %>% addPolygons(fillColor = ~palNhoods(value), 
+    myMap <- leaflet(data=myNhoods) %>% addTiles() %>% addPolygons(fillColor = ~palNhoods(value), 
                                                           popup = ~paste(paste("<b>", neighbourhood, "</b>"),
                                                                          paste("<b>", labelNhoodPopUp, "</b>", round(value)),
                                                                          sep = "<br/>")
@@ -315,5 +340,23 @@ shinyServer(function(input, output, session) {
                                 labFormat = labelFormat(prefix = "$"),
                                 opacity = 0.7, data = customdata
                       )
+    if(input$showPOIs && length(input$poiCategory) == 1){
+      myPois <- pois()
+      myPois <- myPois[myPois$CATEGORY==input$poiCategory,]
+      clustering <- TRUE
+      if(length(input$poiSubCategory) > 0){
+        myPois <- myPois[as.character(myPois$SUBCATEGORY) %in% input$poiSubCategory,]
+        clustering <- NULL
+      }
+      myMap <- myMap %>% addMarkers(~LON, ~LAT, layerId = ~ID, 
+                                    popup = ~paste(paste("<b>", NAME, "</b>"),
+                                                   paste("<b>Category: </b> ", as.character(CATEGORY)),
+                                                   paste("<b>Subcategory: </b> ", as.character(SUBCATEGORY)),
+                                                   sep = "<br/>"),
+                                    label = ~as.character(NAME),
+                                    clusterOptions = clustering,
+                                    data = myPois)
+    }
+    myMap
   })
 })

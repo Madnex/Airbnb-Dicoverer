@@ -3,11 +3,10 @@
 Discover data from Airbnb. Visually. Dynamically. Simple.
 
 # To-Do
-* Per Host Filter/Analysis for map (filter by host) and plots (number of listings by host, prices by host)
-* Neighborhoods names when onclick
-* Map show available dates for listing when selected
+* Per Host Filter/Analysis for map (filter by host)
 * External data sources (supermarkets etc.)
-* Random plots
+* Linear Model
+* some more cities
 
 # Project Structure
 ## Algorithms
@@ -17,7 +16,7 @@ The project is structured into the following files:
 * **ui.R**: User interface logic
 * **server.R**: Server logic (calculations)
 * **global.R**: Globally available variables
-* **preprocessing.R**: Used for manuell preprocessing of calendar data, only needed if new data is imported
+* **preprocessing.R**: Used for manual preprocessing of calendar data, only needed if new data is imported
 
 ## Data
 

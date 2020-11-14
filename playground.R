@@ -19,7 +19,7 @@ calendar[calendar$listing_id==695607,]
 
 
 
-listings <- cityListings[["Paris"]]
+listings <- cityListings[["Athens"]]
 
 listings[listings$host_id==6792,]
 
@@ -123,8 +123,8 @@ library(rgdal)
 
 
 
-
-nhoods <- cityNhoods[["Lyon"]]
+listings <- cityListings[["Athens"]]
+nhoods <- cityNhoods[["Athens"]]
 
 
 selValue <- "count"
@@ -139,7 +139,7 @@ ColorPal2 <- colorNumeric(scales::seq_gradient_pal(low = "red", high = "black",
                                                    space = "Lab"), domain = c(0,1))
 pal <- colorNumeric("viridis", NULL)
 
-leaflet(nhoods) %>% addTiles() %>%  addPolygons(fillColor = ~pal(selValue)) %>% 
+leaflet(nhoods) %>% addTiles() %>%  addPolygons() %>% 
   addCircleMarkers(~longitude, ~latitude,
                    popup = ~paste(paste("<b>", name, "</b>"),
                                   paste("<b>Reviews: </b> ", as.character(number_of_reviews)),
@@ -147,7 +147,8 @@ leaflet(nhoods) %>% addTiles() %>%  addPolygons(fillColor = ~pal(selValue)) %>%
                                   paste("<b>Minimum nights: </b> ", as.character(minimum_nights)),
                                   paste("<b>Room type: </b> ", as.character(room_type)),
                                   paste("<b>Host: </b> ", as.character(host_name)),
-                                  sep = "<br/>"), color = ~pal(reviews_per_month), data = listings[1:100,])
+                                  sep = "<br/>"), data = listings[1:100,]) %>%
+  addMarkers(~LON, ~LAT, popup = ~paste(NAME, CATEGORY), data = localPOI[1:100,])
 
 
 
@@ -157,3 +158,41 @@ hist(listings$price)
 
 
 
+# POIs
+
+
+poiData <- read.csv("Data/POIs/athens-pois.osm.csv.gz", header = TRUE, sep = "|")
+# Filter for area square
+c_lat <- mean(listings$latitude)
+c_lon <- mean(listings$longitude)
+
+epsilon <- 0.06
+lon_min <- poiData$LON > c_lon - epsilon
+lon_max <- poiData$LON < c_lon + epsilon
+
+lat_min <- poiData$LAT > c_lat - epsilon
+lat_max <- poiData$LAT < c_lat + epsilon
+
+area_sel <- lon_min & lon_max & lat_min & lat_max
+any(area_sel)
+
+# Circle
+r <- 0.05
+lon <- poiData$LON - c_lon
+lat <- poiData$LAT - c_lat
+
+area_sel <- lon**2 + lat**2 < r**2 
+
+# Filter for category
+boring <- poiData$CATEGORY %in% c("BUSINESS", "RELIGIOUS", "EDUCATION", "LANDUSE",
+                                  "AUTOMOTIVE", "SETTLEMENTS", "HEALTH", "ACCOMMODATION", 
+                                  "PUBLICSERVICE")
+localPOI <- poiData[area_sel & !boring,]
+unique(localPOI$CATEGORY)
+unique(localPOI$SUBCATEGORY[localPOI$CATEGORY == "TRANSPORT"])
+localPOI <- cityPOI[["Brussels"]]
+unique(localPOI$CATEGORY)
+length(localPOI$SUBCATEGORY[localPOI$CATEGORY == "EAT/DRINK"])
+
+library(geosphere)
+distGeo(c(localPOI$LON[1], localPOI$LAT[1]), c(localPOI$LON[2],localPOI$LAT[2]))
