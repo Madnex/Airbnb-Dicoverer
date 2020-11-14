@@ -40,10 +40,11 @@ shinyServer(function(input, output, session) {
   clickVal <- eventReactive(input$map_marker_click,{
     wasClicked(TRUE)
     click<-input$map_marker_click
-    if(is.null(click) || typeof(click$id)=="character" ){
+    if(is.null(click)){
       wasClicked(FALSE)
       return()
     }
+    wasClicked(typeof(click$id) != "character")
     click$id
   })
   
@@ -91,6 +92,9 @@ shinyServer(function(input, output, session) {
   })
   
   output$clickValMap <- renderText({
+    if(typeof(clickVal()) == "character"){
+      return(paste("You selected the POI with id:", clickVal()))
+    }
     paste("You selected the listing with id:", as.character(clickVal()))
   })
   
@@ -109,6 +113,7 @@ shinyServer(function(input, output, session) {
     # select even the extreme outliers
     min_nights <- listings()$minimum_nights
     slideRanges <- c(round(seq(min(min_nights), quantile(min_nights, 0.9), length.out = 49)), max(min_nights))
+    slideRanges <- rev(slideRanges)
     sliderTextInput("minNights", "Minumum Nights", 
                     choices = slideRanges,
                     selected = slideRanges[25])
@@ -121,7 +126,8 @@ shinyServer(function(input, output, session) {
   })
   
   output$lmSelectionCheckbox <- renderUI({
-    vars <- c("neighbourhood", "latitude", "longitude", "room_type", "number_of_reviews")
+    vars <- c("neighbourhood", "latitude", "longitude", "room_type", 
+              "number_of_reviews", "availability_365")
     checkboxGroupInput("lmSelection", "Variables", 
                        choices = vars, 
                        selected = vars)
@@ -153,7 +159,7 @@ shinyServer(function(input, output, session) {
   output$selectHostForGant <- renderUI({
     byHost <- listings() %>% group_by(host_id) %>% summarise(listings=length(host_id))
     choicesHosts <- c(byHost[byHost$listings >= 3 & byHost$listings <= 10,1])
-    selectInput("HostForGant", "Host", 
+    selectInput("HostForGant", "Host (with 3-10 listings)", 
                        choices = choicesHosts, 
                        selected = choicesHosts[1])
   })
@@ -168,8 +174,9 @@ shinyServer(function(input, output, session) {
   
   output$selectHostForMap <- renderUI({
     byHost <- listings() %>% group_by(host_id,host_name) %>% summarise(listings=length(host_id))
+    byHost <- byHost[byHost$listings > 3,]
     choicesHosts <- c("No host selected",paste(byHost$host_name, byHost$host_id, sep = "_"))
-    selectInput("HostForMap", "Select a host", 
+    selectInput("HostForMap", "Select a host (with at least 4 listings)", 
                 choices = choicesHosts,
                             selected = choicesHosts[1])
   })
@@ -323,7 +330,7 @@ shinyServer(function(input, output, session) {
     myNhoods <- nhoods()
     
     customdata <- myListings[myListings$price <= input$maxPrice,]
-    customdata <- customdata[customdata$minimum_nights == input$minNights,]
+    customdata <- customdata[customdata$minimum_nights >= input$minNights,]
     customdata <- customdata[customdata$room_type %in% input$roomTypes,]
     if(!is.null(input$HostForMap)){
       if (input$HostForMap != "No host selected"){
@@ -346,8 +353,8 @@ shinyServer(function(input, output, session) {
                                                           popup = ~paste(paste("<b>", neighbourhood, "</b>"),
                                                                          paste("<b>", labelNhoodPopUp, "</b>", round(value)),
                                                                          sep = "<br/>")
-                                                          ) %>% 
-      addCircleMarkers(~longitude, ~latitude, layerId=~id,
+                                                          )
+    myMap <- myMap %>% addCircleMarkers(~longitude, ~latitude, layerId=~id,
                        popup = ~paste(paste("<b>", name, "</b>"),
                                       paste("<b>Reviews: </b> ", as.character(number_of_reviews)),
                                       paste("<b>Price: </b> ", as.character(price), "€"),
@@ -356,13 +363,13 @@ shinyServer(function(input, output, session) {
                                       paste("<b>Host: </b> ", as.character(host_name)),
                                       paste("<b>Link: <a href='https://www.airbnb.com/rooms/", as.character(id), "' target='_blank'>Airbnb</a>", sep = ""),
                                       sep = "<br/>"),
-                       color = ~pal(price), data = customdata, radius = 2, opacity = 0.7) %>% 
-                      addLegend("bottomright", pal = palNhoods, values = ~value,
+                       color = ~pal(price), data = customdata, radius = 4, opacity = 0.7)
+    myMap <- myMap %>% addLegend("bottomright", pal = palNhoods, values = ~value,
                            title = "Neighbourhood",
                            labFormat = labelFormat(suffix = labelNhood),
                            opacity = 0.7
-                       ) %>%
-                      addLegend("bottomleft", pal = pal, values = ~price,
+                       )
+    myMap <- myMap %>% addLegend("bottomleft", pal = pal, values = ~price,
                                 title = "Listings",
                                 labFormat = labelFormat(prefix = "$"),
                                 opacity = 0.7, data = customdata
@@ -379,6 +386,7 @@ shinyServer(function(input, output, session) {
                                     popup = ~paste(paste("<b>", NAME, "</b>"),
                                                    paste("<b>Category: </b> ", as.character(CATEGORY)),
                                                    paste("<b>Subcategory: </b> ", as.character(SUBCATEGORY)),
+                                                   paste("<b>Link: <a href='https://www.openstreetmap.org/", as.character(ID), "' target='_blank'>OSM</a>", sep = ""),
                                                    sep = "<br/>"),
                                     label = ~as.character(NAME),
                                     clusterOptions = clustering,
@@ -391,4 +399,9 @@ shinyServer(function(input, output, session) {
     myLM <- linearModel()
     summary(myLM)
   })
+  
+  output$headingLM <- renderText({
+    "A customizable linear model for target variable price"
+  })
+    
 })

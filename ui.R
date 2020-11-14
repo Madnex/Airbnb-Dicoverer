@@ -69,7 +69,7 @@ shinyUI(
                             sidebarPanel(
                               sliderInput("quantileScatterX", "Select quantile to cutoff x", min=0.1, max=1, step=0.01, value=0.99),
                               selectInput("xVarScatter", "Select variable for x", choices = choicesScatter, selected = choicesScatter[1]),
-                              selectInput("yVarScatter", "Select variable for y", choices = choicesScatter, selected = choicesScatter[2])
+                              selectInput("yVarScatter", "Select variable for y", choices = choicesScatter, selected = choicesScatter[4])
                             ),
                             mainPanel(
                               plotOutput("scatterPlot")
@@ -138,6 +138,7 @@ shinyUI(
                        
                        # Show a plot of the generated distribution
                        mainPanel(
+                         textOutput("headingLM"),
                          verbatimTextOutput("lmSummary")
                        )
                      )

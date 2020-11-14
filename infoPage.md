@@ -13,3 +13,5 @@ Here you can find descriptive statistics visually prepared for your eyes.
 ### Explore Page
 On this page you can explore the data visually on a map and filter it by some extend.
  
+### Linear Model Page
+This page allows you to interactively conduct a linear model for the target variable price.
