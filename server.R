@@ -312,7 +312,6 @@ shinyServer(function(input, output, session) {
     customdata <- myListings[myListings$price <= input$maxPrice,]
     customdata <- customdata[customdata$minimum_nights == input$minNights,]
     customdata <- customdata[customdata$room_type %in% input$roomTypes,]
-    #print(input$HostForMap)
     if(!is.null(input$HostForMap)){
       if (input$HostForMap != "No host selected"){
         customdata <- customdata[customdata$host_id == strsplit(input$HostForMap, "_")[[1]][2],]
