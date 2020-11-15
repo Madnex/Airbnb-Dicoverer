@@ -11,12 +11,15 @@ source('read_data.R')
 
 ####################################################
 # SUPPORTED CITIES
-
+####################################################
 # Paris is not supported on shinyapps.io since it takes too much ram, however, if you
 # run this app locally you can simply add "Paris" here to see it as well.
-
-supportedCities <- list("Brussels", "Edinburgh", "Lyon", "Bordeaux", "Munich", "Athens")
-
+#
+supportedCities <- list("Brussels", "Edinburgh", "Lyon", "Bordeaux", "Munich", "Athens", "Paris")
+#
+#
+####################################################
+# END SUPPORTED CITIES
 ####################################################
 
 # Loading the data variables cityListings, cityNhoods, cityCalendar and cityPOI

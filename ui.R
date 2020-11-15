@@ -43,6 +43,12 @@ shinyUI(
                         ),
                         tabPanel(
                           "Details",
+                          wellPanel(
+                            radioButtons("detailsSelection", "Select the data set",
+                                         choices = c("Calendar", "Listings", "POIs"),
+                                         selected = "Listings",
+                                         inline = TRUE)
+                          ),
                           dataTableOutput("allInfo")
                         ),
                         tabPanel(
@@ -68,6 +74,7 @@ shinyUI(
                           sidebarLayout(
                             sidebarPanel(
                               sliderInput("quantileScatterX", "Select quantile to cutoff x", min=0.1, max=1, step=0.01, value=0.99),
+                              sliderInput("quantileScatterY", "Select quantile to cutoff y", min=0.1, max=1, step=0.01, value=0.99),
                               selectInput("xVarScatter", "Select variable for x", choices = choicesScatter, selected = choicesScatter[1]),
                               selectInput("yVarScatter", "Select variable for y", choices = choicesScatter, selected = choicesScatter[4])
                             ),
@@ -94,6 +101,27 @@ shinyUI(
                         ),
                         tabPanel(
                           "Hosts",
+                          tags$head(tags$style(type="text/css", "
+                             #loadmessage {
+                                width: 100px;
+                                height: 100px;
+                                position: absolute;
+                                top:0;
+                                bottom: 0;
+                                left: 0;
+                                right: 0;
+                                margin: auto;
+                                padding: 5px;
+                                text-align: center;
+                                font-weight: bold;
+                                color: #000000;
+                                border-radius: 25px;
+                                background-color: #808080;
+                                z-index: 9999;
+                             }
+                          ")),
+                          conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                           tags$div("Loading...",id="loadmessage")),
                           amChartsOutput("barChartListHost"),
                           sidebarLayout(
                             sidebarPanel(

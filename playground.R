@@ -196,3 +196,9 @@ length(localPOI$SUBCATEGORY[localPOI$CATEGORY == "EAT/DRINK"])
 
 library(geosphere)
 distGeo(c(localPOI$LON[1], localPOI$LAT[1]), c(localPOI$LON[2],localPOI$LAT[2]))
+
+
+
+library(digest)
+hex <- paste('#',substring(digest("test"), 1,6), sep="")
+hex

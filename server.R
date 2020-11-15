@@ -9,6 +9,7 @@
 
 library(plyr)
 library(tidyverse)
+library(digest)
 
 
 shinyServer(function(input, output, session) {
@@ -167,7 +168,7 @@ shinyServer(function(input, output, session) {
   output$selectHostForPrices <- renderUI({
     byHost <- listings() %>% group_by(host_id) %>% summarise(listings=length(host_id))
     choicesHosts <- c(byHost[byHost$listings >= 3 & byHost$listings <= 180,1])
-    selectInput("HostForPrices", "Host", 
+    selectInput("HostForPrices", "Host (with more than 3 listings)", 
                 choices = choicesHosts, 
                 selected = choicesHosts[1])
   })
@@ -188,14 +189,15 @@ shinyServer(function(input, output, session) {
   
   output$histograms <- renderAmCharts({
     # Create a custom data frame with a cutoff, to allow for detailed selectable plots
-    custom_listings <- custom_listings <- listings()[listings()[,input$varHist] < quantile(listings()[,input$varHist], input$quantileHist),]
+    custom_listings <- listings()[listings()[,input$varHist] < quantile(listings()[,input$varHist], input$quantileHist),]
     amHist(custom_listings[,input$varHist], control_hist = list(breaks = input$barsHist),
            freq=FALSE, xlab=names(choicesHistogram)[choicesHistogram == input$varHist])
   })
   
   output$scatterPlot <- renderPlot({
     # Create a custom data frame with a cutoff, to allow for detailed selectable plots
-    custom_listings <- custom_listings <- listings()[listings()[,input$xVarScatter] < quantile(listings()[,input$xVarScatter], input$quantileScatterX),]
+    custom_listings <- listings()[listings()[,input$xVarScatter] < quantile(listings()[,input$xVarScatter], input$quantileScatterX),]
+    custom_listings <- custom_listings[custom_listings[,input$yVarScatter] < quantile(custom_listings[,input$yVarScatter], input$quantileScatterY),]
     p <- ggplot(custom_listings) + aes_string(x=input$xVarScatter, y=input$yVarScatter, colour="room_type") + geom_point(alpha=0.5)
     p <- p + xlab(names(choicesScatter)[choicesScatter == input$xVarScatter]) + ylab(names(choicesScatter)[choicesScatter == input$yVarScatter])
     p <- p + guides(colour=guide_legend(title="Room Type"))
@@ -206,49 +208,49 @@ shinyServer(function(input, output, session) {
     stats_by_neighb <- ddply(listings(),~neighbourhood,summarise,count=length(price))
     names(stats_by_neighb) <- c("label", "value")
     sorted <- stats_by_neighb[order(stats_by_neighb$value, decreasing = TRUE),]
+    # Making sure that the colors are the same as the colors in the bar chart
+    sorted$color <- sapply(sorted$label, function(u) paste('#',substring(digest(u), 1,6), sep=""))
     # Limit the output to the top 20 since too many neighbourhoods are not suitable for a piechart
-    amPie(sorted[1:20,], inner_radius = 50, depth = 10, main="Proportion of number of Listings by neighbourhood (only top 20)")
+    amPie(sorted[1:15,], inner_radius = 50, depth = 10, main="Proportion of number of listings by neighbourhood (only top 15)")
   })
   
   output$barChartPrice <- renderAmCharts({
     stats_by_neighb <- ddply(listings(),~neighbourhood,summarise,price=round(mean(price), digits = 2))
     names(stats_by_neighb) <- c("label", "value")
     sorted <- stats_by_neighb[order(stats_by_neighb$value, decreasing = TRUE),]
-    amBarplot("label", "value", data = sorted, depth = 10, labelRotation=20, main="Average Price per neighbourhood")
+    sorted$description <- paste(sorted$label, sorted$value)
+    # Making sure that the colors are the same as the colors in the pie chart
+    sorted$color <- sapply(sorted$label, function(u) paste('#',substring(digest(u), 1,6), sep=""))
+    amBarplot("label", "value", data = sorted, depth = 10, labelRotation=20, 
+              main="Average price per neighbourhood")
   })
   
 
   output$boxplotHost <- renderAmCharts({
     # plotting the prices of all listings of a given host 
-    # The host has to have at least 3 listings to allow for a nice plot, therefore only those
     # hosts are selectable (see output$selectHostForPrice)
-    
     myListings <- listings()
-    
-    ids <- unique(myListings$host_id[myListings$host_id==input$HostForPrices])
-    allGant <- data.frame(matrix(ncol=2, nrow=0))
-    colnames(allGant) <- c("price", "ID")
-    
-    for(i in 1:length(ids)){
-      id <- ids[i]
-      myID <- myListings[myListings$host_id==id,]
-      if(dim(myID)[1]!=0){
-        tmp <- data.frame(price=myID$price, ID=id)
-        allGant <- rbind(allGant, tmp)
-      }
-    }
-    allGant$ID <- as.factor(allGant$ID)
-    
-    amBoxplot(price ~ ID, data = allGant, main = "Prices distribution")
+    myIDs <- myListings[myListings$host_id==input$HostForPrices,]
+    amBoxplot(myIDs$price, main = "Prices distribution")
   })
 
   output$barChartListHost <- renderAmCharts({
     stats_by_host <- ddply(listings(),~as.character(host_id),summarise,count=length(price))
     names(stats_by_host) <- c("label", "value")
     sorted <- stats_by_host[order(stats_by_host$value, decreasing = TRUE),]
-    amBarplot("label", "value", data = sorted[1:30,], depth = 10, labelRotation=20, main="Number of Listings per Host (only top 30)")
+    sorted$description <- paste(sorted$label, ":", sorted$value)
+    amBarplot("label", "value", data = sorted[1:30,], depth = 10, labelRotation=20, main="Number of listings per Host (only top 30)")
   })
-  output$allInfo <- renderDataTable(listings())
+  
+  output$allInfo <- renderDataTable({
+    sel <- input$detailsSelection
+    if(sel == "Calendar")
+      return(calendar())
+    if(sel == "Listings")
+      return(listings())
+    if(sel == "POIs")
+      return(pois())
+    })
   
   output$gantchartIDs <- renderPlot({
     # Gantt Chart, plotting the availability of all listings of a given host 

@@ -42,6 +42,7 @@ preprocess_pois <- function(filename){
 
 preprocess_pois("lyon")
 preprocess_pois("bordeaux")
+preprocess_pois("paris")
 preprocess_pois("munich")
 preprocess_pois("athens")
 preprocess_pois("edinburgh")
