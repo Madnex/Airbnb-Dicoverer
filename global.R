@@ -16,7 +16,7 @@ source('read_data.R')
 # run this app locally you can simply add "Paris" here to see it as well. 
 # For adding more cities see README.md
 #
-supportedCities <- list("Brussels", "Edinburgh", "Lyon", "Bordeaux", "Munich", "Athens", "Paris")
+supportedCities <- list("Brussels", "Edinburgh", "Lyon", "Bordeaux", "Munich", "Athens")
 #
 #
 ####################################################

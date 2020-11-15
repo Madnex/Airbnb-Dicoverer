@@ -40,6 +40,8 @@ The last step is to add the city's name to the *supportedCities* list in **globa
 
 # App Structure
 
+![Airbnb Logo](airbnb.png){ width=50% }
+
 ## Data
 To allow for this analysis we made use of two data sources, each delivering multiple input files. In the following the reader gets and overview of these data sources.
 
