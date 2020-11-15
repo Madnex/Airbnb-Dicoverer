@@ -13,10 +13,10 @@ source('read_data.R')
 # SUPPORTED CITIES
 ####################################################
 # Paris is not supported on shinyapps.io since it takes too much ram, however, if you
-# run this app locally you can simply add "Paris" here to see it as well. 
+# run this app locally you can simply add "Paris" and "Athens" here to see it as well. 
 # For adding more cities see README.md
 #
-supportedCities <- list("Brussels", "Edinburgh", "Lyon", "Bordeaux", "Munich", "Athens")
+supportedCities <- list("Brussels", "Edinburgh", "Lyon", "Bordeaux", "Munich")
 #
 #
 ####################################################
