@@ -1,7 +1,7 @@
 ---
 title: "Report Data Visualization: Airbnb Discoverer"
 subtitle: "Discover data from Airbnb. Visually. Dynamically. Simple."
-author: "Jan Lennartz & Hornella Fakem Fosso"
+author: "Jan Lennartz & Hornella Fokem Fosso"
 output:
   pdf_document: default
   html_document: default
