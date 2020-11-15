@@ -104,7 +104,7 @@ shinyUI(
                           tags$head(tags$style(type="text/css", "
                              #loadmessage {
                                 width: 100px;
-                                height: 100px;
+                                height: 35px;
                                 position: absolute;
                                 top:0;
                                 bottom: 0;
@@ -137,13 +137,13 @@ shinyUI(
             tabPanel("Explore",
                      sidebarLayout(
                        sidebarPanel(
+                         radioButtons("nhoodValue", "Neighbourhood color by:", 
+                                      choices = c("Number of Listings"="count", "Average Price"="avgPrice",
+                                                  "Number of Reviews"="nReviews"), selected = "count"),
                          uiOutput("selectHostForMap"),
                          uiOutput("maxPriceSlider"),
                          uiOutput("minNightsSlider"),
                          uiOutput("roomTypesCheckbox"),
-                         radioButtons("nhoodValue", "Neighbourhood color by:", 
-                                      choices = c("Number of Listings"="count", "Average Price"="avgPrice",
-                                                  "Number of Reviews"="nReviews"), selected = "count"),
                          checkboxInput("showPOIs", "Show Points of Interest"),
                          uiOutput("poiCategoryRadio"),
                          uiOutput("poiSubCategoryCheckbox"),
@@ -159,14 +159,16 @@ shinyUI(
                      )
             ),
             tabPanel("Linear Model",
+                     fluidPage(
+                       htmlOutput("headingLM")
+                     ),
                      sidebarLayout(
                        sidebarPanel(
                          uiOutput("lmSelectionCheckbox")
                        ),
-                       
                        # Show a plot of the generated distribution
                        mainPanel(
-                         textOutput("headingLM"),
+                         
                          verbatimTextOutput("lmSummary")
                        )
                      )

@@ -177,7 +177,7 @@ shinyServer(function(input, output, session) {
     byHost <- listings() %>% group_by(host_id,host_name) %>% summarise(listings=length(host_id))
     byHost <- byHost[byHost$listings > 3,]
     choicesHosts <- c("No host selected",paste(byHost$host_name, byHost$host_id, sep = "_"))
-    selectInput("HostForMap", "Select a host (with at least 4 listings)", 
+    selectInput("HostForMap", "Host (with more than 3 listings)", 
                 choices = choicesHosts,
                             selected = choicesHosts[1])
   })
@@ -403,7 +403,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$headingLM <- renderText({
-    "A customizable linear model for target variable price"
+    "<h2>A customizable linear model for the target variable price</h2>"
   })
     
 })

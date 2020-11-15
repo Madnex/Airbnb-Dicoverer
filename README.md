@@ -55,7 +55,7 @@ The description of the data can be found here: *http://www.slipo.eu/?p=1551*.
 It can be easily extended to more cites. The only limitation is your RAM. The only version of this app (*https://madnex.shinyapps.io/Airbnb/*) is limited to 1GB RAM. This is why some big cities would by themselves demand most of  the RAM here and only some "minor" cities are shown. 
 
 ## Pages
-On top of each page there is a header which allows to switch dynamically between the available cities. 
+On top of each page there is a header which allows to switch dynamically between the available cities. Every calculation on every page is therefore easily applied to each city and it is possible to compare the available cities with each other.
 
 ### Info Page
 An overview over the app and where to find what. 
@@ -71,7 +71,19 @@ Here can be found descriptive statistics visually prepared for the reader's eyes
 * Hosts: Here, a bar plot of the number of listings per host can be seen. Additionally, a boxplot is shown where the host can be selected and it will show the distribution of the prices of the listings owned by this host.
 
 ### Explore Page
-On this page you can explore the data visually on a map and filter it by some extend.
+On this page it is possible to explore the data visually on a map and filter it by some extend. The map shows all filtered listings and the neighbourhoods. The listings are colored according to their price and the neighbourhoods are colored by either the number of listings per neighbourhood, the average price of the listings per neighbourhood or the number of reviews of all listings in a neighbourhood. This is selectable by the user. These statistics of the neighbourhoods are not influenced by the filtering on the listings, meaning that the neighbourhood colors are always calculated based on all listings.
+
+It is also possible to select a host and have a look at all the listings on the map that belong to this host. The filtering allows to filter by price and/or by the minimum nights. The price filter removes all listings that have a higher price than the selected value. The nights filter removes all listings that have less minimum nights than the selected value. Therefore, one can choose the nights one wants to spend at the very minimum and check which listings offer stays of that length or more. Additionally, one can choose which types of listings should be shown: entire homes/apartements, hotel rooms, private rooms and/or shared rooms. 
+
+As an extension it is possible to show points of interest (*POI*) on the map. If selected the POI's are shown in a clustered way since there are too many of them to display all at once. In fact they are so many, that only a category of them is shown at a time. This can be chosen from a radio button list. However, if the user selects a subcategory, the  POI's are displayed directly without any clustering, as now the number of them is expected to be moderate. It is possible to select multiple subcategories at once.
+
+Clicking on a listing reveals a pop-up which has information about its name, number of reviews, price, minimum nights, room type, host and a link to the listing on the Airbnb website. Furthermore, if a listing is selected on the map, a gantt chart is shown which displays the listing's availability for the next 12 months. However, if the listing is not available at all, the user gets to see a message explaining this to him. Clicking on a POI shows a pop-up with information about its name, category, subcategory and a link to Open Street Maps of the node. Whenever a listing or a POI is selected on the map there is a message shown under the map revealing the id of the selected listing or POI.
+
+
 
 ### Linear Model Page
-This page allows you to interactively conduct a linear model for the target variable price.
+This page allows interactively conduct a linear model for the target variable price. The variables can be selected dynamically out of the variables: neighbourhood, latitude, longitude, room type, number of reviews and availability. The output of a summary call of the corresponding linear model is then shown and the user can check how well the model is fitted.
+
+
+
+
